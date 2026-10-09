@@ -1,0 +1,11 @@
+{
+  "guild_id": "1553384450354577509",
+  "channel_id": "1558196393598783558",
+  "rank_roles": {
+    "rainbow": ["Rainbow Jamplers"],
+    "nitro": ["Nitro Jamplers"],
+    "iron": ["Iron Jamplers"]
+  },
+  "react": true,
+  "max_messages": 5000
+}
