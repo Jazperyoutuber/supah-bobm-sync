@@ -1,0 +1,68 @@
+# Every 30 minutes (and whenever extras.txt or the settings change): read the Discord ranks, keep supporters.txt up to
+# date in the repository, and publish both lists on GitHub Pages for the world to download.
+name: Sync supporters
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  push:
+    branches: [main]
+    paths: ["extras.txt", "config.json", "sync.py", ".github/workflows/sync.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: supporter-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the Discord ranks
+        id: read
+        continue-on-error: true
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: python3 sync.py
+
+      - name: Keep the list in the repository
+        run: |
+          git config user.name "supporter-sync"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add supporters.txt heartbeat.txt 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Update the supporter list"
+            # Someone may have saved extras.txt while this ran.
+            git pull --rebase --autostash
+            git push
+          fi
+
+      - name: Put the site together
+        run: |
+          mkdir -p site
+          cp supporters.txt extras.txt site/
+          printf '<!doctype html><meta charset="utf-8"><title>Supah Bobm Survival supporters</title><p>The supporter lists the world reads: <a href="supporters.txt">supporters.txt</a> and <a href="extras.txt">extras.txt</a>.</p>\n' > site/index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: Flag a failed Discord read
+        if: steps.read.outcome == 'failure'
+        run: |
+          echo "Reading Discord failed, so supporters.txt wasn't updated this time (extras.txt was still published)."
+          echo "Open the 'Read the Discord ranks' step above to see why."
+          exit 1
