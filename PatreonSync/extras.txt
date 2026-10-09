@@ -1,5 +1,0 @@
-# Hand-added supporters for Supah Bobm Survival's skill skins: gifts, friends, testers, anyone the Discord sync missed.
-# One a line: the rank (iron, nitro or rainbow), a space or tab, then their exact VRChat display name.
-# Lines starting with # are notes and are ignored. Save (commit) and it's live in about a minute.
-#
-rainbow JazperHim

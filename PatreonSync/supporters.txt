@@ -1,2 +1,0 @@
-# Supah Bobm Survival supporters - written by sync.py, don't edit (use extras.txt for hand-added names).
-# rank<TAB>VRChat name. Not synced yet.
